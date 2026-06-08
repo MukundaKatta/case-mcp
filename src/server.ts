@@ -54,14 +54,16 @@ export const STYLES: CaseStyle[] = [
 export function splitWords(input: string): string[] {
   if (!input) return [];
   // Insert spaces at transitions: lower→Upper, Upper→Upper+lower, digit boundaries.
+  // Unicode-aware (\p{...} with the u flag) so accented and non-Latin letters
+  // such as `café` or `δοκιμή` are preserved rather than stripped.
   const s = input
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .replace(/([A-Za-z])([0-9])/g, '$1 $2')
-    .replace(/([0-9])([A-Za-z])/g, '$1 $2');
-  // Replace any non-alphanumeric with space, lowercase, collapse.
+    .replace(/(\p{Ll}|\p{N})(\p{Lu})/gu, '$1 $2')
+    .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, '$1 $2')
+    .replace(/(\p{L})(\p{N})/gu, '$1 $2')
+    .replace(/(\p{N})(\p{L})/gu, '$1 $2');
+  // Replace any non-letter/non-number with space, lowercase, collapse.
   return s
-    .replace(/[^A-Za-z0-9]+/g, ' ')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim()
     .toLowerCase()
     .split(/\s+/)

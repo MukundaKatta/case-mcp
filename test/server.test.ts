@@ -50,6 +50,24 @@ test('Sentence case', () => {
   assert.equal(toCase('hello WORLD', 'sentence'), 'Hello world');
 });
 
+test('lower and upper styles', () => {
+  assert.equal(toCase('helloWorld', 'lower'), 'hello world');
+  assert.equal(toCase('helloWorld', 'upper'), 'HELLO WORLD');
+});
+
+test('preserves non-ASCII letters', () => {
+  // Previously these accented/non-Latin characters were silently stripped.
+  assert.deepEqual(splitWords('café résumé'), ['café', 'résumé']);
+  assert.deepEqual(splitWords('naïveCase'), ['naïve', 'case']);
+  assert.deepEqual(splitWords('δοκιμή Test'), ['δοκιμή', 'test']);
+  assert.equal(toCase('café résumé', 'snake'), 'café_résumé');
+  assert.equal(toCase('naïveCase', 'kebab'), 'naïve-case');
+});
+
+test('splits digit boundaries', () => {
+  assert.deepEqual(splitWords('version2Point0'), ['version', '2', 'point', '0']);
+});
+
 test('empty input returns empty string', () => {
   assert.equal(toCase('', 'camel'), '');
 });
